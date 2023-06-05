@@ -1,0 +1,41 @@
+LocationCode,LocationDescription,CoordinateNB,CoordinateOL
+A121,A12 Platform ,55.416663,3.816671
+AWG1,AWG Platform,53.491640,5.941140
+"BSA (BSA1, BSA2)",Borssele Alpha platform,51.699921,3.056707
+BTA1,Brent Alpha platform ,61.034890,1.705410
+BTC1,Brent Charlie Platform,61.096110,1.721390
+D151 (D152),D15 Platform ,54.316663,2.933333
+EPL1 (EPL2),Europlatform ,51.997801,3.275075
+F161,F16 Platform,54.116669,4.016670
+F31,F3 Platform,54.849995,4.716658
+GAN1,Gannet platform,57.185030,1.000000
+HAEW1,Haewene Brim,57.160556,2.293056
+HKN,Hollandse Kust Noord,52.697770,4.293500
+HKZA,Hollandse Kust Zuid Alpha,52.319527,4.043129
+J61 (J62),J6 Platform,53.816632,2.950010
+K131 (K132),K13 Alpha,53.217010,3.218932
+K141,K14 Platform,53.266670,3.633330
+L91,L9 Platform,53.616669,4.966667
+LEG1 (LEG2),LE Goeree,51.925745,3.669874
+NC1,North Cormorant,61.338188,1.166099
+NLS1,Nelson platform,57.661690,1.145000
+P111 (P112),P11 Platform,52.358670,3.341500
+A122,A12 platform meetboei,55.401000,3.807000
+EPL3,Europlatform - meetboei,51.997800,3.266470
+HAEW2,Haewene Brim - meetboei,57.160556,2.293056
+K133,K13 Alpha - meetboei,53.215600,3.212530
+BUBW,Buitenbanken west,51.795020,2.972250
+DWE1,Eurogeul DWE - meetboei,51.947520,2.998960
+E131,Eurogeul E13 - meetboei,52.009200,3.735640
+IJG1,IJgeul 1 - meetboei,52.490020,4.269700
+MMND,Maasmond Maasvlakte Noord - meetboei,51.992500,4.005000
+MUN1,IJgeul Munitiestort 1 - meetboei,52.562500,4.063620
+MUN2,IJgeul Munitiestort 2 - meetboei,52.566110,4.078250
+OS11b,Oosterschelde 11 (b),51.643290,3.480331
+OS4b,Oosterschelde 4 (b),51.655880,3.693954
+SCB2,Schouwenbank 2 - meetboei,51.746910,3.310240
+SCHB,Schouwenbank - meetboei,51.752570,3.322480
+SMN1,Schiermonnikoog Noord - meetboei,53.594830,6.165390
+SMWG,Schiermonnikoog Westgat - meetboei,53.526120,6.035650
+SPY1,IJgeul stroommeetpaal,52.463736,4.517361
+STM1,Stortemelk - meetboei,53.326390,4.990830

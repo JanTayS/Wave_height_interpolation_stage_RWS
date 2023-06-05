@@ -33,13 +33,18 @@ for file in os.listdir(directory):
     # Print the statistics
     # print(stats)
     
-    # stats.to_csv(f'Statistics/summary_stats_{file_name}.csv', index=True)
+    stats.to_csv(f'Statistics/summary_stats_{file_name}.csv', index=True)
 
-    for column in df_values.columns:
-        if plot_variable in column:
-            # plot_values.append(df_values[column].iloc[:500])
-            new_df[file_name] = df_values[column]
-            labels.append(file_name)
+    # for column in df_values.columns:
+    #     if plot_variable in column:
+    #         # plot_values.append(df_values[column].iloc[:500])
+    #         new_df[file_name] = df_values[column]
+    #         labels.append(file_name)
+
+
+
+
+
 
 
 
@@ -57,30 +62,30 @@ for file in os.listdir(directory):
 # plt.show()
 
 # plot all columns in new_df as boxplots in a single plot
-new_df.boxplot()
+# new_df.boxplot()
 
-# set the title and axis labels
-plt.xlabel('File')
-plt.ylabel('Significant wave height')
-plt.title(f'Boxplot of {plot_variable} for all files')
+# # set the title and axis labels
+# plt.xlabel('File')
+# plt.ylabel('Significant wave height')
+# plt.title(f'Boxplot of {plot_variable} for all files')
 
-# show the plot
-plt.show()
+# # show the plot
+# plt.show()
 
-# create a histogram for each column in new_df
-for col in new_df:
-    plt.hist(new_df[col], bins=20, alpha=0.5, label=col)
+# # create a histogram for each column in new_df
+# for col in new_df:
+#     plt.hist(new_df[col], bins=20, alpha=0.5, label=col)
 
-# set the title and axis labels
-plt.xlabel('Value')
-plt.ylabel('Frequency')
-plt.title(f'Histogram of {plot_variable} for all files')
+# # set the title and axis labels
+# plt.xlabel('Value')
+# plt.ylabel('Frequency')
+# plt.title(f'Histogram of {plot_variable} for all files')
 
-# add a legend
-plt.legend()
+# # add a legend
+# plt.legend()
 
-# show the plot
-plt.show()
+# # show the plot
+# plt.show()
 
 
 # loop over the variables and create a separate plot for each variable
