@@ -11,7 +11,6 @@ variable = 'Hm0'
 
 file_list = os.listdir(directory)
 
-
 for file in file_list:
     # Construct the full path to the directory
     file_path = os.path.join(directory, file)
@@ -32,7 +31,6 @@ for file in file_list:
                 merged_df = pd.merge(df,merged_df, how='outer', on='datetime')
             else:
                 merged_df = df
-      
 
 merged_df = merged_df.reset_index(drop=True)
 merged_df.to_csv(f'merged_file_{variable}.csv', index=False)

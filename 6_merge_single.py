@@ -11,6 +11,13 @@ variable = 'WS10'
 
 file_list = os.listdir(directory)
 
+def find_empty_columns(df):
+    empty_columns = []
+    for column in df.columns:
+        missing_values = df[column].isnull().sum()
+        if missing_values == df.shape[0]:
+            empty_columns.append(column)
+    return empty_columns
 
 for file in file_list:
     # Construct the full path to the directory
@@ -31,6 +38,8 @@ for file in file_list:
     else:
         merged_df = df
       
+empty_columns = find_empty_columns(merged_df)
+merged_df.drop(empty_columns, axis=1, inplace=True)
 
 merged_df = merged_df.reset_index(drop=True)
 merged_df.to_csv('final_data.csv', index=False)
