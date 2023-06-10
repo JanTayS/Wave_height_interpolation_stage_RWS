@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import linear_model as lm
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.impute import SimpleImputer
 
 df = pd.read_csv('merged_file_Hm0.csv')
 
@@ -27,6 +29,8 @@ def correlations(df):
     plt.savefig('corr_matrix.png')
     plt.show()
     return corr_matrix
+
+
 
 print(correlations(df))
 

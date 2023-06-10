@@ -24,12 +24,12 @@ for _, location in wind_speed_columns:
         wind_direction_rad = np.radians(df[wind_direction_column])
         wind_direction_x = np.cos(wind_direction_rad)
         wind_direction_y = np.sin(wind_direction_rad)
-        combined_column_x = f'Wind_x_{location}'
-        combined_column_y = f'Wind_y_{location}'
+        combined_column_x = f'wind_x_{location}'
+        combined_column_y = f'wind_y_{location}'
         df[combined_column_x] = wind_direction_x * df[wind_speed_column]
         df[combined_column_y] = wind_direction_y * df[wind_speed_column]
 
 # Print the updated DataFrame
 print(df)
 
-df.to_csv('wind.csv', index=False)
+df.to_csv('final_data_wind.csv', index=False)

@@ -52,7 +52,7 @@ def find_empty_columns(df):
 
 def linear_regression(df_train, df_test, location='K131', variable='Hm0'):
     # Get the predictors and location_variable
-    predictors, location_variable = get_predictors(df_test, location, variable)
+    predictors, location_variable = get_predictors(df_train, location, variable)
     variables = predictors + [location_variable]
     all_variables = []
 

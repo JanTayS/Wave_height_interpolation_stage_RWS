@@ -37,6 +37,26 @@ def get_locations(df):
             locations.add(location)
     return sorted(list(locations))
 
+def get_locations_dict(df):
+    locations = get_locations(df)
+    locations_dict = {}
+    for location in locations:
+        location_variables = []
+        for column in df.columns:
+            if location in column:
+                location_variables.append(column)
+        locations_dict[location] = location_variables
+    return locations_dict
+
+def select_dataset(df, variables):
+    columns = []
+    for variable in variables:
+        for column in df.columns:
+            if variable in column:
+                columns.append(column)
+    selection_dataset = df[columns]
+    return selection_dataset
+
 def remove_nan(df, min_rows=0):
     clean_df = df.copy()
     while clean_df.dropna().shape[0] <= min_rows:
