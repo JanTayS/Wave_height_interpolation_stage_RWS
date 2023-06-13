@@ -46,6 +46,12 @@ class model_data():
                     columns_to_delete.append(column)
         self.dataset = self.dataset.drop(columns=columns_to_delete)
 
+    def add_past_data(self, past_data_count=6):
+        for column in self.dataset.columns:
+            for past_data in range(past_data_count):
+                self.dataset[f'{column}_-{past_data}'] = self.dataset[column].shift(-past_data)
+    
+
     def get_location_data(self, location_target_variable):
         location_dataset = self.dataset.copy()
         target_location = location_target_variable.split('_')[1]
@@ -57,7 +63,10 @@ class model_data():
     
     def create_target(self, location_target_variable, feature_dataset):
         feature_dataset['target'] = feature_dataset[location_target_variable]
-        feature_dataset[location_target_variable] = np.nan
+        feature_dataset[location_target_variable] = feature_dataset[location_target_variable].median()
+        feature_dataset = feature_dataset.dropna(subset=['target'])
+        input_variables = [input_variable for input_variable in feature_dataset.columns if input_variable != 'target']
+        feature_dataset[input_variables] = feature_dataset[input_variables].fillna(feature_dataset[input_variables].median())
         return feature_dataset
 
     def stack_location_data(self, split_wind=True):
@@ -72,7 +81,6 @@ class model_data():
                 if self.target_variable in location_variable:
                     location_target_variable = location_variable
             if location_target_variable == None:
-                print('test')
                 continue
             location_dataset = self.get_location_data(location_target_variable)
             target_dataset = self.create_target(location_target_variable, location_dataset)
@@ -90,8 +98,11 @@ if __name__ == '__main__':
     # model_dataset = data_modelling.stack_location_data()
     # model_dataset.to_csv('model_dataset.csv')
 
-    location_dataset = data_modelling.get_location_data('Hm0_K141')
-    test_model_dataset = data_modelling.create_target('Hm0_K141',location_dataset)
+    location = 'Hm0_NC1'
+    data_modelling.get_wind_xy()
+    # data_modelling.add_past_data()
+    location_dataset = data_modelling.get_location_data(location)
+    test_model_dataset = data_modelling.create_target(location,location_dataset)
     test_model_dataset.reset_index(drop=True)
-    test_model_dataset.to_csv('model_dataset2.csv')
+    test_model_dataset.to_csv(f'model_dataset_{location}.csv')
     
