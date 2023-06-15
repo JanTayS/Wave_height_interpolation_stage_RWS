@@ -14,10 +14,11 @@ from get_variables import get_regression_df2
 
 class regression_model:
     def __init__(self, data_file, target_variable):
-        self.df = pd.read_csv(data_file)
+        self.datetime_df = pd.read_csv(data_file)
+        self.df = self.datetime_df.drop('datetime', axis=1, inplace=False)
         self.target_variable = target_variable
         self.input_variables = self.get_all_inputs()
-        self.model = {}
+        self.model_info = {}
         (
             self.train_features,
             self.test_features,
@@ -36,11 +37,6 @@ class regression_model:
 
         train_features = train_dataset.copy()
         test_features = test_dataset.copy()
-
-        # test_features = test_features.dropna(subset=[self.target_variable])
-        # train_features = train_features.dropna(subset=[self.target_variable])
-        # test_features[self.input_variables] = test_features[self.input_variables].fillna(test_features[self.input_variables].median())
-        # train_features[self.input_variables] = train_features[self.input_variables].fillna(train_features[self.input_variables].median())
 
         train_labels = train_features.pop(self.target_variable)
         test_labels = test_features.pop(self.target_variable)
@@ -90,9 +86,9 @@ class regression_model:
         callbacks=[early_stopping]  # Pass the EarlyStopping callback
         )
 
-        self.model['model'] = regression_model
-        self.model['history'] = history
-        self.model['test_restult'] = regression_model.evaluate(
+        self.model_info['model'] = regression_model
+        self.model_info['history'] = history
+        self.model_info['test_restult'] = regression_model.evaluate(
         self.test_features[self.input_variables],
         self.test_labels, verbose=1)
 
@@ -101,6 +97,10 @@ class regression_model:
             self.plot_loss(history)
         
         return regression_model
+    
+    def hp_tuning(self):
+        pass
+        # return best_hp
 
     def plot_performance(self, model, save=False):
         test_predictions = model.predict(self.test_features[self.input_variables]).flatten()
@@ -122,6 +122,20 @@ class regression_model:
 
         if save:
             plt.savefig('plot.png')
+    def plot_over_time(self, models, save = False):
+        count = 1        
+        for model in models:
+            predictions = model.predict(self.df[self.input_variables]).flatten()
+            plt.plot(self.datetime_df['datetime'][:5000], predictions[:5000], label=f'Predictions_{count}')
+            count+=1
+        plt.plot(self.datetime_df['datetime'][:5000], self.df['target'][:5000], label='True Values')
+        plt.xlabel('Time')
+        plt.ylabel('Value')
+        plt.title('Predictions vs True Values')
+        plt.legend()
+        plt.show()
+
+
 
     def plot_loss(self, history, save=False):
         plt.plot(history.history['loss'], label='loss')
@@ -137,11 +151,13 @@ class regression_model:
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'NC1'
-    data_file = f'model_dataset_Hm0_{location}.csv'
+    location = 'wave_height'
+    # data_file = f'model_dataset_Hm0_{location}.csv'
+    data_file = f'model_datasets/model_dataset2.csv'
     target_variable = 'target'
 
     DNN_model = regression_model(data_file,target_variable)
+    print(DNN_model.df.shape)
     
     print('Multiple_dnn')
     DNN_model.regression()
@@ -163,6 +179,6 @@ if __name__ == '__main__':
                     i += 1
                 model_name = f"{model_name}_{i}"
 
-        DNN_model.model_info['model'].save(model_name)
+        DNN_model.model_info['model'].save(f'models/{model_name}')
 
     

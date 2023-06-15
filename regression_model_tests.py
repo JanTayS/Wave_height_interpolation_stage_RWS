@@ -6,15 +6,19 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 from Regression_working import regression_model
+import os
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'NC1'
-    data_file = f'model_dataset_Hm0_{location}.csv'
+    location = 'D151'
+    data_file = f'model_datasets/model_dataset_Hm0_{location}.csv'
     target_variable = 'target'
-    variables = ['Hm0','WS10','PQFF10']
 
-    loaded_model = keras.models.load_model('model_NC1')
+    models = []
+    models_path = 'models'
+    for model in os.listdir(models_path):
+        model_path = os.path.join(models_path, model)
+        models.append(keras.models.load_model(model_path))
 
     test_model = regression_model(data_file,target_variable)
-    test_model.plot_performance(loaded_model)
+    test_model.plot_over_time(models,save=True)
