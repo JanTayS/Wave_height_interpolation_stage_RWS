@@ -10,15 +10,20 @@ import os
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'D151'
+    location = 'K141'
     data_file = f'model_datasets/model_dataset_Hm0_{location}.csv'
     target_variable = 'target'
 
     models = []
     models_path = 'models'
-    for model in os.listdir(models_path):
-        model_path = os.path.join(models_path, model)
-        models.append(keras.models.load_model(model_path))
+    
+    # for model in os.listdir(models_path):
+    #     model_path = os.path.join(models_path, model)
+    #     models.append(keras.models.load_model(model_path))
 
+    model = keras.models.load_model('models\model_K141')
+    
+    # input_names = [layer.name for layer in models.layers if isinstance(layer, keras.layers.InputLayer)]
+    # print(input_names)
     test_model = regression_model(data_file,target_variable)
-    test_model.plot_over_time(models,save=True)
+    test_model.plot_over_time(model,save=True)

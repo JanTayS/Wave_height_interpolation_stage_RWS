@@ -6,7 +6,7 @@ from get_variables import select_dataset
 import os
 
 class model_data():
-    def __init__(self,df,split_wind=True):
+    def __init__(self,df,split_wind=True, add_past_hours=True):
         self.raw_dataset = df.copy()
         self.variables = ['datetime','Hm0','WS10','WR10','PQFF10']
         self.dataset = select_dataset(self.raw_dataset,self.variables)
@@ -14,6 +14,8 @@ class model_data():
         self.target_variable = 'Hm0'
         if split_wind:
             self.get_wind_xy()
+        if add_past_hours:
+            self.calculate_hourly_averages()
 
     def get_wind_xy(self, delete_non_directional_wind=True):
         # Identify the columns for wind speed and wind direction
@@ -53,7 +55,16 @@ class model_data():
         for column in self.dataset.columns:
             for past_data in range(past_data_count):
                 self.dataset[f'{column}_-{past_data}'] = self.dataset[column].shift(-past_data)
-    
+
+    def calculate_hourly_averages(self, num_hours=6):
+        for column in self.dataset.columns:
+            if 'Hm0' in column:
+                col_name1 = f'{column}_avg_1_hour_ago'
+                window_size = 6
+                self.dataset[col_name1] = self.dataset[column].rolling(window=window_size).mean()
+                for i in range(1, num_hours):
+                    col_name = f'{column}_avg_{i}_hour'
+                    self.dataset[col_name] = self.dataset[col_name1].shift(window_size*i)
 
     def get_location_data(self, location_target_variable):
         location_dataset = self.dataset.copy()
@@ -66,12 +77,16 @@ class model_data():
     
     def create_target(self, location_target_variable, feature_dataset):
         feature_dataset['target'] = feature_dataset[location_target_variable]
-        feature_dataset[location_target_variable] = feature_dataset[location_target_variable].median()
+        variable, location = location_target_variable.split('_')
+        for column in feature_dataset.columns:
+            if variable in column and location in column:
+                feature_dataset[column] = feature_dataset[column].median()
+        # feature_dataset[location_target_variable] = feature_dataset[location_target_variable].median()
         feature_dataset = feature_dataset.dropna(subset=['target'])
         return feature_dataset
     
-    def drop_impute(self, dataset):
-        input_variables = [input_variable for input_variable in dataset.columns if input_variable != 'target']
+    def drop_impute(self, dataset, location_target_variable):
+        input_variables = [input_variable for input_variable in dataset.columns if input_variable != location_target_variable]
         dataset[input_variables] = dataset[input_variables].fillna(dataset[input_variables].median())
         return dataset
 
@@ -86,18 +101,18 @@ class model_data():
             if location_target_variable == None:
                 continue
             location_dataset = self.get_location_data(location_target_variable)
-            target_dataset = self.create_target(location_target_variable, location_dataset)
+            model_dataset = self.drop_impute(location_dataset, location_target_variable)
+            target_dataset = self.create_target(location_target_variable, model_dataset)
             if stacked_data.empty:
                 stacked_data = target_dataset
             else:
                 stacked_data = pd.concat([stacked_data,target_dataset], axis=0)
         stacked_data.reset_index(drop=True)
-        stacked_data = self.drop_impute(stacked_data)
         return stacked_data
 
     def creat_dataset(self, location_target_variable):
         model_dataset = self.get_location_data(location_target_variable)
-        model_dataset = self.drop_impute(model_dataset)
+        model_dataset = self.drop_impute(model_dataset, location_target_variable)
         model_dataset = self.create_target(location_target_variable,model_dataset)        
         model_dataset.reset_index(drop=True)
         return model_dataset
@@ -124,13 +139,13 @@ if __name__ == '__main__':
     df = pd.read_csv('final_data.csv')
     data_modelling = model_data(df)
     model_dataset = data_modelling.stack_location_data()
-    model_dataset.to_csv('model_datasets/model_dataset2.csv',index=False)    
+    model_dataset.to_csv('model_datasets/model_dataset.csv',index=False)    
 
     # data_modelling.create_dataset_loop()
     
 
 
-    # location = 'Hm0_D151'
+    # location = 'Hm0_K141'
     # model_dataset = data_modelling.creat_dataset(location)
     # dataset_name = f'model_dataset_{location}'
     # if os.path.exists(f'model_datasets/{dataset_name}.csv'):

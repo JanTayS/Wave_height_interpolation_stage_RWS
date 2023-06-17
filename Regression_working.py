@@ -122,12 +122,12 @@ class regression_model:
 
         if save:
             plt.savefig('plot.png')
-    def plot_over_time(self, models, save = False):
+    def plot_over_time(self, model, save = False):
         count = 1        
-        for model in models:
-            predictions = model.predict(self.df[self.input_variables]).flatten()
-            plt.plot(self.datetime_df['datetime'][:5000], predictions[:5000], label=f'Predictions_{count}')
-            count+=1
+        predictions = model.predict(self.df[self.input_variables]).flatten()
+
+        
+        plt.plot(self.datetime_df['datetime'][:5000], predictions[:5000], label=f'Predictions_{count}')
         plt.plot(self.datetime_df['datetime'][:5000], self.df['target'][:5000], label='True Values')
         plt.xlabel('Time')
         plt.ylabel('Value')
@@ -151,13 +151,12 @@ class regression_model:
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'wave_height'
-    # data_file = f'model_dataset_Hm0_{location}.csv'
-    data_file = f'model_datasets/model_dataset2.csv'
+    location = 'K141'
+    data_file = f'model_datasets/model_dataset_Hm0_{location}.csv'
+    # data_file = f'model_datasets\model_dataset'
     target_variable = 'target'
 
     DNN_model = regression_model(data_file,target_variable)
-    print(DNN_model.df.shape)
     
     print('Multiple_dnn')
     DNN_model.regression()
