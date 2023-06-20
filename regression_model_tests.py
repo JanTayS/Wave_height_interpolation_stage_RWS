@@ -10,20 +10,18 @@ import os
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'K141'
-    data_file = f'model_datasets/model_dataset_Hm0_{location}.csv'
+    location = 'Hm0_A121'
+    # data_file = 'model_datasets/version_3/model_dataset_training.csv'
+    data_file = f'model_datasets/version_3/model_dataset_{location}.csv'
+    
     target_variable = 'target'
 
-    models = []
-    models_path = 'models'
+    # models = ['models\model_wind_dir','models\model_wind_xy', 'models/model_just_wave_height']
+    models = ['models\model_wind_xy', 'models/model_just_wave_height']
     
-    # for model in os.listdir(models_path):
-    #     model_path = os.path.join(models_path, model)
-    #     models.append(keras.models.load_model(model_path))
+    model_test = regression_model(data_file,target_variable)
+    model_test.plot_over_time(models, prediction_count=10000)
+    # model_test.plot_performance(models)
+    # model_test.show_metrics(models)
 
-    model = keras.models.load_model('models\model_K141')
     
-    # input_names = [layer.name for layer in models.layers if isinstance(layer, keras.layers.InputLayer)]
-    # print(input_names)
-    test_model = regression_model(data_file,target_variable)
-    test_model.plot_over_time(model,save=True)
