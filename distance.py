@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 
-df = pd.read_csv('locations.csv')
+df = pd.read_csv('avaliable_locations.csv')
 
 def calculate_vector(origin, destination):
     # Convert latitude and longitude to radians
@@ -45,6 +45,6 @@ for destination in df['LocationCode']:
     df[f'{destination}_x'] = distances_x
     df[f'{destination}_y'] = distances_y
 
-df.to_csv('location_distance.csv', index=False)
+df.to_csv('avaliable_location_distances.csv', index=False)
 print(df)
 

@@ -2,7 +2,7 @@ import pandas as pd
 from math import sqrt
 
 def get_distance_xy(origin, destination):
-    df = pd.read_csv('location_distance.csv', index_col=0)
+    df = pd.read_csv('avaliable_location_distances.csv', index_col=0)
     for location_code in df.index:
         if origin in location_code:
             origin = location_code
