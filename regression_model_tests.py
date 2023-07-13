@@ -10,22 +10,15 @@ import os
 
 if __name__ == '__main__':
     # Read in the data
-    location = 'Hm0_AWG1'
-    # data_file = 'model_datasets/version_3/model_dataset_test.csv'
-    data_file = f'model_datasets/version_3/model_dataset_{location}.csv'
-    # data_file = 'model_datasets/version_3/model_dataset_all.csv'
-    
+    location = 'D151'
+    data_file = f'model_datasets/model_dataset_Hm0_{location}.csv'
     target_variable = 'target'
 
-    # models = ['models\Linear_models\dataset_Hm0_K131_1']
-    # model = 'models\Linear_models\dataset_Hm0_K131_1'
-    models = ['models/Final_model/model_0']
-    model = 'models/Final_model/model_0' 
+    models = []
+    models_path = 'models'
+    for model in os.listdir(models_path):
+        model_path = os.path.join(models_path, model)
+        models.append(keras.models.load_model(model_path))
 
-    
-    model_test = RegressionModel(data_file,target_variable)
-    # model_test.plot_over_time(models, prediction_count=5000)
-    model_test.plot_performance(model)
-    model_test.show_metrics(models)
-
-    
+    test_model = regression_model(data_file,target_variable)
+    test_model.plot_over_time(models,save=True)
