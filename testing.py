@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import train_test_split, GridSearchCV, HalvingGridSearchCV
 from sklearn.linear_model import LinearRegression, LassoCV
@@ -14,6 +15,7 @@ import statsmodels.api as sm
 from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 def select_df_columns(df, variables = ['Hm0','WS10','wind_x','wind_y', 'PQFF10', 'hour_avg']):
     columns = []
@@ -35,7 +37,6 @@ def select_features_univariate(X, y, k=5):
 
 def select_features_lasso(X, y):
     lasso = LassoCV(cv=5, eps=1e-4, max_iter=5000, n_jobs=-1, verbose=1).fit(X, y)
-    # lasso = LassoCV(cv=5, max_iter=5000, verbose=True, n_jobs=-1).fit(X, y)
     coef = pd.Series(lasso.coef_, index = X.columns)
     selected_features = coef[coef != 0].index
     return selected_features
@@ -76,49 +77,6 @@ def select_features_rfecv(X, y):
     selected_features = X.columns[selector.support_]
     return selected_features
 
-def perform_mlr(file_path, feature_selection_func, PCA=False, **kwargs):
-    df = pd.read_csv(file_path, engine='pyarrow')
-
-    X = df.drop(['datetime', 'target'], axis=1, inplace=False)
-    y = df['target']
-
-    # Normalize the features
-    scaler = StandardScaler()
-    X_normalized = scaler.fit_transform(X)
-
-    X_normalized_df = pd.DataFrame(X_normalized, columns=X.columns)  # Convert to DataFrame
-    
-    if PCA:
-        X_pca = perform_pca(X_normalized_df)
-
-        X_normalized_df = pd.DataFrame(X_pca, columns=[f'PC{i+1}' for i in range(X_pca.shape[1])])
-
-    selected_feature_names = feature_selection_func(X_normalized_df, y, **kwargs)  # Use DataFrame
-
-    features_df_new = X_normalized_df[selected_feature_names]
-
-    X_train, X_test, y_train, y_test = train_test_split(features_df_new, y, test_size=0.7, random_state=1)
-
-    X_train = sm.add_constant(X_train)
-    model = sm.OLS(y_train, X_train)
-    results = model.fit()
-
-    print(results.summary())
-
-    y_pred = results.predict(sm.add_constant(X_test))
-
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = sqrt(mse)
-    r2 = r2_score(y_test, y_pred)
-
-    print('Mean Absolute Error:', mae)
-    print('Mean Squared Error:', mse)
-    print('Root Mean Squared Error:', rmse)
-    print('R-squared:', r2)
-
-    return results
-
 def choose_n_components(X, plot=False):
     # Fit PCA with a large number of components
     pca = PCA().fit(X)
@@ -144,56 +102,6 @@ def perform_pca(X):
     X_pca_df = pd.DataFrame(X_pca, columns=[f'PC{i+1}' for i in range(X_pca.shape[1])])
     return X_pca_df
 
-
-
-def perform_linearSVR(file_path, PCA=False, param_grid=None):
-    df = pd.read_csv(file_path, engine='pyarrow')
-    print('data loaded')
-
-    X = df.drop(['datetime', 'target'], axis=1, inplace=False)
-    y = df['target']
-
-    # Normalize the features
-    scaler = StandardScaler()
-    X_normalized = scaler.fit_transform(X)
-
-    X_normalized_df = pd.DataFrame(X_normalized, columns=X.columns)  # Convert to DataFrame
-    
-    if PCA:
-        X_pca = perform_pca(X_normalized_df)
-
-        X_normalized_df = pd.DataFrame(X_pca, columns=[f'PC{i+1}' for i in range(X_pca.shape[1])])
-
-    X_train, X_test, y_train, y_test = train_test_split(X_normalized_df, y, test_size=0.2, random_state=1)
-
-    # Create an instance of the LinearSVR model
-    svr = LinearSVR(verbose=1, max_iter=10000,dual='auto')
-
-    # Perform parameter tuning if a parameter grid is provided
-    if param_grid:
-        grid_search = HalvingGridSearchCV(estimator=svr, param_grid=param_grid, scoring='neg_mean_absolute_error', cv=5, verbose=5, n_jobs=-1)
-        grid_search.fit(X_train, y_train)
-
-        svr = grid_search.best_estimator_
-        best_params = grid_search.best_params_
-        print('Best Parameters:', best_params)
-
-    # Fit the model on the training data
-    svr.fit(X_train, y_train)
-
-    # Make predictions on the test data
-    y_pred = svr.predict(X_test)
-
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = sqrt(mse)
-    r2 = r2_score(y_test, y_pred)
-
-    print('Mean Absolute Error:', mae)
-    print('Mean Squared Error:', mse)
-    print('Root Mean Squared Error:', rmse)
-    print('R-squared:', r2)
-
 def create_train_test(file_path, feature_selection_func=None, PCA=False, **kwargs):
     df = pd.read_csv(file_path, engine='pyarrow')
 
@@ -213,7 +121,10 @@ def create_train_test(file_path, feature_selection_func=None, PCA=False, **kwarg
         selected_feature_names = feature_selection_func(X_normalized_df, y, **kwargs)  # Use DataFrame
         X_normalized_df = X_normalized_df[selected_feature_names]
 
+    X_normalized_df = sm.add_constant(X_normalized_df)
+
     X_train, X_test, y_train, y_test = train_test_split(X_normalized_df, y, test_size=0.7, random_state=1)
+
     return X_train, X_test, y_train, y_test
 
 def test_model(model, X_test, y_test):
@@ -229,6 +140,7 @@ def test_model(model, X_test, y_test):
     print('Mean Squared Error:', mse)
     print('Root Mean Squared Error:', rmse)
     print('R-squared:', r2)
+    return [mae, mse, rmse, r2]
 
 def MLR(X_train, y_train):
     X_train = sm.add_constant(X_train)
@@ -255,13 +167,15 @@ def SVR(X_train, y_train, param_grid=None):
     svr.fit(X_train, y_train)
     return svr
 
-def create_model(file_path, feature_selection_func=None, PCA=False, model_type=MLR):
+def create_model(file_path, feature_selection_func=None, PCA=False, model_type=MLR, show_plots=False):
     X_train, X_test, y_train, y_test = create_train_test(file_path, feature_selection_func, PCA)
     model = model_type(X_train, y_train)
-    test_model(model, X_test, y_test)
-    plot_actual_predicted(model, X_test, y_test)
-    return model
+    performance = test_model(model, X_test, y_test)
+    if show_plots:
+        plot_actual_predicted(model, X_test, y_test)
 
+    feature_count = X_train.shape[1]
+    return model, performance, feature_count
 
 def plot_actual_predicted(model, X,y):
     X = sm.add_constant(X)
@@ -291,10 +205,62 @@ def plot_actual_predicted(model, X,y):
 
     plt.show()
 
+    def plot_over_time(self, models, X, y, save = False):
+        for model in models:
+            predictions = model.predict(self.df[self.input_variables]).flatten()
+            plt.plot(self.datetime_df['datetime'][:5000], predictions[:5000], label=f'Predictions_{count}')
+            count+=1
+        plt.plot(self.datetime_df['datetime'][:5000], self.df['target'][:5000], label='True Values')
+        plt.xlabel('Time')
+        plt.ylabel('Hm0')
+        plt.title('Predictions vs True Values')
+        plt.legend()
+        plt.show()
+        if save:
+            plt.savefig('plot.png')
+
+def create_all(directory='model_datasets/version_5/', feature_selection_func=select_features_lasso):
+    # Initialize an empty DataFrame to hold the results
+    results = pd.DataFrame(columns=['Location', 'MAE', 'MSE', 'RMSE', 'R2'])
+    
+    # Loop over each file in the directory
+    for dataset in os.listdir(directory):
+        if 'all' not in dataset and 'train' not in dataset and 'test' not in dataset:
+            location = re.search('Hm0_(.*).csv', dataset)
+            if location:
+                location = location.group(1)
+            else:
+                print(f"No match found in {dataset}. Skipping...")
+                continue
+            print(location)
+            data_path = os.path.join(directory, dataset)
+            model, performance, feature_count = create_model(data_path, feature_selection_func)
+            mae, mse, rmse, r2 = performance
+            # Append the results for this location to the DataFrame
+            results = results.append({'Location': location, 'MAE': mae, 'MSE': mse, 'RMSE': rmse, 'R2': r2, 'Features' : int(feature_count)}, ignore_index=True)
+    
+    # print LaTeX table
+    latex_table(results)
+
+    return results
+
+def latex_table(dataframe):
+    latex_tabular = dataframe.to_latex(index=False)
+
+    latex_table = f"""
+    \\begin{{table}}[htbp]
+    \\centering
+    \\caption{{Your Caption}}
+    \\label{{tab:your_label}}
+    {latex_tabular}
+    \\end{{table}}
+    """
+    print(latex_table)
 
 if __name__ == '__main__':
-    dataset = 'model_datasets/version_5/model_dataset_Hm0_K131.csv'
-    model = create_model(dataset, select_features_lasso)
+    dataset = 'model_datasets/version_5/model_dataset_Hm0_L91.csv'
+    # model = create_model(dataset, select_features_lasso)
+    results = create_all()
 
     
     

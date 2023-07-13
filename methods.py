@@ -1,33 +1,23 @@
 import pandas as pd
 import numpy as np
 
-# df_full = pd.read_csv('final_data.csv')
-# print('data_loaded')
+data = pd.read_csv('final_data.csv')
 
-# location = 'L91'
-# location_columns = []
-# for column in df_full.columns:
-#     if location in column:
-#         location_columns.append(column)
+# Remove 'datetime' from the column names
+column_names = [col for col in data.columns if col != 'datetime']
 
+# Extract variable part
+variables = [name.split('_')[0].lstrip('x') for name in column_names]
 
-# # Assuming df is your DataFrame
-# df = df_full[location_columns] # Select all columns except the first one
+# Count occurrences
+variable_counts = pd.Series(variables).value_counts().reset_index()
 
-# # Generate descriptive statistics
-# desc_df = df.describe()
+# Create DataFrame
+variables_count_df = pd.DataFrame(variable_counts)
+variables_count_df.columns = ['Variable', 'Count']
 
-# # Calculate the count of NaN values per column
-# nan_count = df.isnull().sum()
+variables_count_df
 
-# # Append the count of NaN values to the descriptive statistics dataframe
-# desc_df = desc_df.append(pd.Series(nan_count, name='NaN'))
-
-# # Convert the descriptive statistics dataframe to a LaTeX table
-# latex_table = desc_df.to_latex()
-
-# print(latex_table)
-
-test_df = pd.read_hdf('models/run_7/train.h5')
-for column in test_df.columns:
-    print(column)
+# Convert the DataFrame to a LaTeX table
+latex_table = variables_count_df.to_latex(index=False)
+print(latex_table)

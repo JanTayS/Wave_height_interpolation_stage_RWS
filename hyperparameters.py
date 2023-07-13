@@ -74,7 +74,7 @@ class regression_model:
 
         return model
 
-    def hyperparameter_tuning(self, predictor_variables=["Hm0", "distance", "WS10", "WR10", "PQFF10"]):
+    def hyperparameter_tuning(self, predictor_variables=["Hm0", "distance", "WS10", "WR10", "PQFF10", "hour_avg"]):
         predictors = self.get_model_predictors(predictor_variables)
         self.input_variables = predictors        
         input_data = np.array(self.train_features[predictors])
@@ -139,13 +139,13 @@ class regression_model:
 if __name__ == '__main__':
     # Read in the data
     location = 'all'
-    data_file = 'model_datasets/version_3/model_dataset_all.csv'
+    data_file = 'model_datasets/version_5/model_dataset_all.csv'
     # data_file = 'model_datasets/version_3/model_dataset_Hm0_K141.csv'
     target_variable = 'target'
 
     DNN_model = regression_model(data_file,target_variable)
 
-    predictor_variables = ["Hm0", "distance", "WS10", "WR10", "PQFF10"]
+    predictor_variables = ["Hm0", "distance", "WS10", "WR10", "PQFF10", "hour_avg"]
 
     print('Multiple_dnn')
     # DNN_model.regression(predictor_variables)
