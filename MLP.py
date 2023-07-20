@@ -14,6 +14,7 @@ from get_variables import get_regression_df
 from get_variables import get_regression_df2
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from dask import dataframe as dd
+from math import sqrt
 
 
 
@@ -219,9 +220,11 @@ class RegressionModel:
         plt.ylabel(f'Error [Hm0_{self.target_variable}]')
         plt.legend()
         plt.grid(True)
-        plt.show()
+        plt.tight_layout()  # This will reduce the white space around the figure
         if save:
-            plt.savefig('plot.png')
+            plt.savefig('Plots/history.png', bbox_inches='tight')  # This will ensure the saved figure doesn't have unnecessary white space
+        plt.show()
+        
 
     def show_metrics(self, models):
         model_names = []
@@ -245,6 +248,7 @@ class RegressionModel:
 
             # Print the performance metrics
             print("Mean Squared Error: {:.4f}".format(mse))
+            print("Root Mean Squared Error: {:.4f}".format(sqrt(mse)))
             print("Mean Absolute Error: {:.4f}".format(mae))
             print("R^2 Score: {:.4f}".format(r2))
 

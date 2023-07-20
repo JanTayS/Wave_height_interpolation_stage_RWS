@@ -16,6 +16,7 @@ from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import pickle
 
 def select_df_columns(df, variables = ['Hm0','WS10','wind_x','wind_y', 'PQFF10', 'hour_avg']):
     columns = []
@@ -205,12 +206,10 @@ def plot_actual_predicted(model, X,y):
 
     plt.show()
 
-    def plot_over_time(self, models, X, y, save = False):
-        for model in models:
-            predictions = model.predict(self.df[self.input_variables]).flatten()
-            plt.plot(self.datetime_df['datetime'][:5000], predictions[:5000], label=f'Predictions_{count}')
-            count+=1
-        plt.plot(self.datetime_df['datetime'][:5000], self.df['target'][:5000], label='True Values')
+    def plot_over_time(datetime, y, y_preds, save = False):
+        for model in y_preds:
+            plt.plot(datetime, y_preds[model], label=model)
+        plt.plot(datetime, y, label='True Values')
         plt.xlabel('Time')
         plt.ylabel('Hm0')
         plt.title('Predictions vs True Values')
@@ -222,7 +221,7 @@ def plot_actual_predicted(model, X,y):
 def create_all(directory='model_datasets/version_5/', feature_selection_func=select_features_lasso):
     # Initialize an empty DataFrame to hold the results
     results = pd.DataFrame(columns=['Location', 'MAE', 'MSE', 'RMSE', 'R2'])
-    
+    models_dir = 'models/Final_MLR'
     # Loop over each file in the directory
     for dataset in os.listdir(directory):
         if 'all' not in dataset and 'train' not in dataset and 'test' not in dataset:
@@ -239,9 +238,13 @@ def create_all(directory='model_datasets/version_5/', feature_selection_func=sel
             # Append the results for this location to the DataFrame
             results = results.append({'Location': location, 'MAE': mae, 'MSE': mse, 'RMSE': rmse, 'R2': r2, 'Features' : int(feature_count)}, ignore_index=True)
     
+            model_path = os.path.join(models_dir, location)
+            # Save the model
+            with open(f'{model_path}.pkl', 'wb') as f:
+                pickle.dump(model, f)
+
     # print LaTeX table
     latex_table(results)
-
     return results
 
 def latex_table(dataframe):
@@ -257,9 +260,10 @@ def latex_table(dataframe):
     """
     print(latex_table)
 
+
 if __name__ == '__main__':
     dataset = 'model_datasets/version_5/model_dataset_Hm0_L91.csv'
-    # model = create_model(dataset, select_features_lasso)
+    # model = create_model(dataset, select_features_lasso, show_plots=True)
     results = create_all()
 
     

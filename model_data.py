@@ -84,6 +84,7 @@ class model_data():
     
     def drop_impute(self, dataset, location_target_variable):
         input_variables = [input_variable for input_variable in dataset.columns if input_variable != location_target_variable]
+        # input_variables = [input_variable for input_variable in dataset.columns if location_target_variable not in input_variable]
         dataset[input_variables] = dataset[input_variables].fillna(dataset[input_variables].median())
         return dataset
 
